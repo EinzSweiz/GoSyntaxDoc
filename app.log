@@ -1,0 +1,8 @@
+{"ip":"127.0.0.1","level":"info","method":"GET","msg":"Reqeust received","time":"2025-03-06T08:06:23-06:00","url":"/panic"}
+{"ip":"127.0.0.1","level":"info","method":"GET","msg":"Reqeust received","time":"2025-03-06T08:23:23-06:00","url":"/panic"}
+{"ip":"127.0.0.1","level":"info","method":"GET","msg":"Reqeust received","time":"2025-03-06T08:23:42-06:00","url":"/panic"}
+{"error":"Panic occurred","ip":"127.0.0.1","level":"error","method":"GET","msg":"Recovered from panic","time":"2025-03-06T08:23:42-06:00","url":"/panic"}
+{"ip":"127.0.0.1","level":"info","method":"GET","msg":"Reqeust received","time":"2025-03-06T08:23:45-06:00","url":"/panic"}
+{"error":"Panic occurred","ip":"127.0.0.1","level":"error","method":"GET","msg":"Recovered from panic","time":"2025-03-06T08:23:45-06:00","url":"/panic"}
+{"ip":"127.0.0.1","level":"info","method":"GET","msg":"Reqeust received","time":"2025-03-06T08:23:46-06:00","url":"/panic"}
+{"error":"Panic occurred","ip":"127.0.0.1","level":"error","method":"GET","msg":"Recovered from panic","time":"2025-03-06T08:23:46-06:00","url":"/panic"}
