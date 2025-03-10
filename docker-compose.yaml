@@ -33,6 +33,13 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - fiber-network
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fiber-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -68,8 +75,7 @@ services:
   kafka-admin:
     build:
       context: .
-      dockerfile: Dockerfile
-    command: "go run app/root/kafka_admin_topics.go"
+      dockerfile: Dockerfile.kafka-admin
     container_name: kafka-admin
     depends_on:
       - kafka
@@ -77,6 +83,26 @@ services:
       - fiber-network
     environment:
       - KAFKA_BROKER=kafka:9092
+
+  kafka-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer  # ✅ Use the separate consumer Dockerfile
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: mysecret
+      DB_NAME: mydb
+      DB_PORT: 5432
+    depends_on:
+      - kafka
+      - db
+      - redis
+      - fiber-app
+    restart: always
+    networks:
+      - fiber-network
+
 
 volumes:
   db_data:

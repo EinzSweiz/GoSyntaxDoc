@@ -82,3 +82,39 @@ func (repo *UserRepository) CreateUser(first_name string, last_name string) (*en
 
 	return &user, nil
 }
+
+func (repo *UserRepository) FetchAllUsers() ([]entities.User, error) {
+	ctx := context.Background()
+	query := `SELECT id, first_name, last_name, created_at FROM users`
+	rows, err := repo.DB.Query(ctx, query)
+	if err != nil {
+		middleware.Log.WithFields(logrus.Fields{"error": err}).Error("Database Query Error")
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []entities.User
+
+	for rows.Next() {
+		var user entities.User
+		var createdAt pgtype.Timestamp // ✅ Use pgx.NullTime instead of sql.NullTime
+		err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &createdAt)
+		if err != nil {
+			middleware.Log.WithFields(logrus.Fields{"error": err}).Error("Database Query Error")
+			return nil, err
+		}
+		if createdAt.Valid {
+			user.CreatedAt = entities.JSONTime{Time: createdAt.Time}
+		} else {
+			user.CreatedAt = entities.JSONTime{} // Empty timestamp
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		middleware.Log.WithFields(logrus.Fields{"error": err}).Error("Database Query Error")
+		return nil, err
+	}
+
+	return users, nil
+
+}

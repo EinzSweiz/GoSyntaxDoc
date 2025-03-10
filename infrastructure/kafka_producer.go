@@ -10,49 +10,49 @@ import (
 )
 
 type KafkaProducer struct {
-	Writer *kafka.Writer
+	Brokers []string
 }
 
 // ✅ Constructor Function (Dependency Injection)
-func NewKafkaProducer(brokers []string, topic string) *KafkaProducer {
+func NewKafkaProducer(brokers []string) *KafkaProducer {
 	return &KafkaProducer{
-		Writer: kafka.NewWriter(kafka.WriterConfig{
-			Brokers:   brokers,
-			Topic:     topic,
-			Balancer:  &kafka.LeastBytes{},
-			BatchSize: 1,
-		}),
+		Brokers: brokers,
 	}
 }
 
-func (p *KafkaProducer) ProduceMessage(key string, value string) error {
+// ✅ Send Message to Dynamic Topics
+func (p *KafkaProducer) ProduceMessage(topic string, key string, value string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	// ✅ Create a new writer for each topic dynamically
+	writer := kafka.NewWriter(kafka.WriterConfig{
+		Brokers:   p.Brokers,
+		Topic:     topic, // ✅ Dynamic Topic
+		Balancer:  &kafka.LeastBytes{},
+		BatchSize: 1,
+	})
 
 	message := kafka.Message{
 		Key:   []byte(key),
 		Value: []byte(value),
 	}
 
-	err := p.Writer.WriteMessages(ctx, message)
+	err := writer.WriteMessages(ctx, message)
 	if err != nil {
 		middleware.Log.WithFields(logrus.Fields{
 			"error": err,
-		})
+			"topic": topic,
+		}).Error("❌ Error producing Kafka message")
 		return err
-
 	}
+
 	middleware.Log.WithFields(logrus.Fields{
 		"message": "✅ Kafka Message Sent",
+		"topic":   topic,
 		"value":   value,
-	})
-	return nil
-}
+	}).Info("✅ Message sent successfully to Kafka")
 
-func (p *KafkaProducer) Close() error {
-	if p.Writer != nil {
-		middleware.Log.Info("Kafka Producer closed")
-		return p.Writer.Close()
-	}
-	return nil
+	// ✅ Close writer after sending the message
+	return writer.Close()
 }

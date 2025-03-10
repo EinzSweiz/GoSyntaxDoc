@@ -1,4 +1,4 @@
-package gosyntaxdoc
+package main // ✅ Change this from `gosyntaxdoc` to `main`
 
 import (
 	"log"
@@ -10,9 +10,9 @@ import (
 const kafkaBroker = "kafka:9092"
 
 var topics = []string{
-	"notification.create",
-	"notification.fetch",
-	"notification.read",
+	"user.create",
+	"user.fetch",
+	"user.read",
 }
 
 // Function to check if a topic exists
@@ -58,10 +58,24 @@ func createKafkaTopics() {
 	}
 }
 
-func main() {
+func waitForKafka() {
+	for i := 0; i < 10; i++ {
+		conn, err := kafka.Dial("tcp", kafkaBroker)
+		if err == nil {
+			conn.Close()
+			break
+		}
+		log.Printf("�� Kafka not yet ready. Retrying... (%d/10)", i+1)
+		time.Sleep(3 * time.Second)
+
+	}
+	log.Println("�� Kafka is ready!")
+}
+
+func main() { // ✅ Now it will work because package is `main`
 	log.Println("⏳ Waiting for Kafka to be ready...")
 	time.Sleep(10 * time.Second) // Wait for Kafka startup
-
+	waitForKafka()
 	createKafkaTopics()
 	log.Println("✅ Kafka topics setup completed!")
 }
